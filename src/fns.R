@@ -30,3 +30,12 @@ advent_data <- function(year, day) {
 }
 
 
+#' @export
+matrix_of_chars <- function(x) {
+    x |>
+    strsplit('') |>
+    unlist() |>
+    matrix(byrow=TRUE, nrow=nchar(x)) |>
+    t()
+}
+
