@@ -5,7 +5,7 @@ box::use(stringr[str_c, str_sub])
 
 # some basic data
 possible_letters = c(letters, toupper(letters))
-priority = as.integer(1:length(possible_letters)) |> setNames(possible_letters)
+priority = seq_along(possible_letters) |> setNames(possible_letters)
 # priority as a function
 get_priority = function(x) priority[x]
 
@@ -21,7 +21,7 @@ split_sack = function(sack) {
 # for objects x and y, binary operation f(x,y) -> z is all elements in x also in y
 # not exactly a monoid because it isn't important for us to preserve identity right now.
 common_item = function(x, y) {
-    splitx = strsplit(x, '')[[1]]
+    splitx = strsplit(x, "")[[1]]
     matches = splitx %in% strsplit(y, '')[[1]] 
     splitx[matches] |> unique() |> str_c(collapse='') # collapsing ensures (m, m) -> m
 }
