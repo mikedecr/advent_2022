@@ -31,7 +31,7 @@ common_among = partial(Reduce, f = common_item)
 # ----- part 1 ----------
 
 # main
-sacks = fns$advent_data(year = 2022, day = 3) |> head(-1)
+sacks = readLines(here::here("data", "03.txt"))
 a1 = sacks |> map(split_sack) |> map_chr(common_among) |> map_int(get_priority) |> sum()
 
 # ----- part 2 ----------
@@ -45,9 +45,6 @@ groups_of(sacks, 3) |>
     map_int(get_priority) |>
     sum() |>
     print()
-
-
-
 
 if (FALSE) {
 # test on vector of strings
