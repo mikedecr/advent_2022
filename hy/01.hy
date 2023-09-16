@@ -22,10 +22,6 @@
 ; flip the signature of map: (map f d) -> (apply d f)
 (setv apply (flip map))
 
-; cast a list to list of ints
-(defn list_to_ints [collection] 
-  (list (map int collection)))
-
 ; descending sort
 (setv sort_decreasing (compose reversed sorted))
 
