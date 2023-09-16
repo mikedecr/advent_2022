@@ -1,7 +1,7 @@
 ; usage: 
 ; $ hy 01.hy -f path/to/file.txt
 
-; this is done with derranged functional style
+; this is done with deranged functional style
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;;    functions    ;;
