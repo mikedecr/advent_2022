@@ -1,29 +1,23 @@
 ; usage: 
 ; $ hy 01.hy -f path/to/file.txt
 
-(import argparse [ArgumentParser])
-(setv ps (ArgumentParser))
-; take a file arg
-(. ps (add_argument "-f" "--file"))
-(setv args (. ps (parse_args)))
+; this is done with derranged functional style
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;;    functions    ;;
 ;;;;;;;;;;;;;;;;;;;;;
 
+; ----- abstract things ----------
+
 (import more_itertools [split_at])
 (import operator [eq])
-(import toolz [juxt flip pipe curry take compose compose_left])
+(import toolz [juxt flip curry take compose compose_left])
 (require hyrule [->])
 
 ; it's insane that this is what python makes you do btw
 (defn readlines [f] 
   (with [o (open f "r")]
         (.readlines o)))
-
-; divide a list at some delimiter value
-(defn split_at_value [collection v]
-  (split_at collection (curry eq v)))
 
 ; flip the signature of map: (map f d) -> (apply d f)
 (setv apply (flip map))
@@ -35,22 +29,23 @@
 ; descending sort
 (setv sort_decreasing (compose reversed sorted))
 
-;;;;;;;;;;;;;;;;
-;;    main    ;;
-;;;;;;;;;;;;;;;;
 
-; -> is threading macro.
-; effectively a pipe operator: (-> data f1 f2 f3) == (f3 (f2 (f1 data)))
+; ----- problem-focused compositions ----------
+
+; read lines into a nested list of ints.
+; list of "elves", each elf is a list of ints (one int per "meal" ugh)
+; I refuse to use classes but that would probably help me as pseudo-types.
+;; ; -> is threading macro.
+;; ; effectively a pipe operator: (-> data f1 f2 f3) == (f3 (f2 (f1 data)))
 (defn read_elf_data [filepath]
-    (-> filepath (readlines)
-       (split_at_value "\n")
-       (apply list_to_ints)
-       (list)))
+  (-> filepath (readlines)
+               (apply (fn [s] (.replace s "\n" "")))
+               (split_at (curry eq ""))
+               (apply (compose list (curry map int))) ; lmao
+               (list)))
 
-; pre-compute the data but this isn't necessary, could have composed this step
-(setv elves (read_elf_data (. args file)))
-
-; part 1: given a list of lists of ints, calculate sum per list and return the largest sum
+; part 1: [[int]] -> int
+; nested list of ints -> sum per list -> largest sum
 ; this is a _function_
 (setv part1 (compose max (curry map sum)))
 
@@ -62,9 +57,21 @@
                 (curry take 3)
                 sum))
 
-; [fns] -> [values]
-(setv solve_together (juxt part1 part2))
+;;;;;;;;;;;;;;;;
+;;    main    ;;
+;;;;;;;;;;;;;;;;
 
-; get your answers
-(print (solve_together elves))
+; parse a file from cmd line args
+(import argparse [ArgumentParser])
+(setv ps (ArgumentParser))          ; create a "parser" instance
+(. ps (add_argument "-f" "--file")) ; expect a --file arg
+(setv args (. ps (parse_args)))     ; arg values in a namespace
+(setv file (. args file))           ; unpack provided file to string
+
+; I am being obnoxious on purpose.
+; juxt: (f1 f2) -> (x -> (val1, val2))
+(setv compute_answers (juxt part1 part2))
+
+(setv answers (compute_answers (read_elf_data file)))
+(print answers)
 
