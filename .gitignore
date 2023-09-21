@@ -2,3 +2,4 @@
 .Renviron
 .undo
 .DS_Store
+hy/__pycache__
