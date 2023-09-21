@@ -1,5 +1,5 @@
-box::use(fns = ./src/fns)
-box::use(purrr[map, partial, compose, map_int])
+partial = purrr::partial
+map = purrr::map
 
 compose_right = partial(compose, .dir='forward')
 
@@ -19,6 +19,8 @@ lift = function(f) partial(do.call, what=f)
 
 
 # ----- do part 1 ----------
+
+is_range_contained = function(a, b)
 
 any_contained = function(a, b) {
     # safety: check length of a and b

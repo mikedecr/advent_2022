@@ -1,7 +1,8 @@
-# imports
-box::use(fns = ./src/fns)
-box::use(purrr[compose, partial, map_int, map_chr, map])
-box::use(stringr[str_c, str_sub])
+# # imports
+# box::use(purrr[compose, partial, map_int, map_chr, map])
+library('purrr')
+library('stringr')
+# box::use(stringr[str_c, str_sub])
 
 # some basic data
 possible_letters = c(letters, toupper(letters))
@@ -33,6 +34,8 @@ common_among = partial(Reduce, f = common_item)
 # main
 sacks = readLines(here::here("data", "03.txt"))
 a1 = sacks |> map(split_sack) |> map_chr(common_among) |> map_int(get_priority) |> sum()
+
+sacks |> map(split_sack) |> map(as.list) |> map(lift(common_item)) |> map(lift(get_priority)) |> lift(sum)()
 
 # ----- part 2 ----------
 
