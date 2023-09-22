@@ -28,20 +28,22 @@
 
 ; ----- problem library ----------
 
-; true when (any/all) b elements are in a
-; provide any/all as :how
+; for each b, assess its membership in a
+; and accumulate with some `how` function.
+
+; The joy here is a procedural abstraction.
+; the function doesn't know what `how` is and doesn't have to.
+; in practice, we will pass `:how any` or `:how all` to reduce the inclusions to a bool
+; as we will see, that will be the only difference between parts 1 and 2
 (defn contains_how [a b how]
   (setv in_a (curry contains a))
   (how (map in_a b)))
 
-; for a pair a b, check how_contains both directions
+; for a pair a b, check how_contains in both directions
+; (a in b) or (b in a)
 (defn either_contains_how [a b how]
   (or (contains_how a b how)
       (contains_how b a how)))
-
-; unpack a pair to separate sets and evaluate inclusion
-(defn pair_either_contains_how [pair how]
-  (either_contains_how (unpack-iterable pair) how))
 
 
 ;;;;;;;;;;;;;;;
@@ -54,15 +56,16 @@
 (.add_argument ps "-f" "--file")       ; expect a --file arg
 (setv file (. (.parse_args ps) file))  ; unpack provided file to string
 
-(defn part1 [section_assignments]
-  (setv total_containments
-        (map (curry pair_either_contains_how :how all) section_assignments))
-  (sum total_containments))
+; modifies signature of either_contains to take a pair; inject `how`, and sum
+(defn count_containments [assignments how]
+  (setv pair_contains
+    (fn [pair] (either_contains_how (unpack-iterable pair) how)))
+  (setv containments (map pair_contains assignments))
+  (sum containments))
 
-(defn part2 [section_assignments]
-  (setv partial_containments
-        (map (curry pair_either_contains_how :how any) section_assignments))
-  (sum partial_containments))
+; feels good
+(setv part1 (curry count_containments :how all))
+(setv part2 (curry count_containments :how any))
 
 (setv answers ((juxt part1 part2) (readlines file)))
 (print answers)
