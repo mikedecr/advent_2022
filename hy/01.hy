@@ -66,8 +66,7 @@
 
 ; I am being obnoxious on purpose.
 ; juxt: (f1 f2) -> (x -> (val1, val2))
-(setv compute_answers (juxt part1 part2))
 
-(setv answers (compute_answers (read_elf_data file)))
+(setv answers ((juxt part1 part2) (read_elf_data file)))
 (print answers)
 
