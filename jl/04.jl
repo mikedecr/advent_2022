@@ -1,8 +1,7 @@
 
-using PartialFunctions: $
 using Functors: fmap
 
-
+# partials
 function rpartial(f, b...)::Function 
     (a...) -> f(a..., b...) 
 end
@@ -11,9 +10,12 @@ function partial(f, a...)::Function
     (b...) -> f(a..., b...)
 end
 
+# like purrr::lift (deprecated) or partial(do.call, fn)
 function unpack(f::Function) 
     t -> f(t...)
 end
+
+
 #================#
 #=    part 1    =#
 #================#
@@ -35,7 +37,7 @@ function either_range_contained(a::UnitRange, b::UnitRange)
     range_contained(a, b) || range_contained(b, a)
 end
 
-function part1(data)
+function part1(data::AbstractArray{String})::Int
     f = unpack(either_range_contained) ∘ parse_ranges
     sum(map(f, data))
 end
@@ -44,11 +46,19 @@ end
 #=    part 2    =#
 #================#
 
-function part2(data)
-    f = >=(1) ∘ length ∘ (reduce $ intersect) ∘ parse_ranges
+function part2(data::AbstractArray{String})::Int
+    # array -> (array -> (int -> bool))
+    any_intersect = >=(1) ∘ length ∘ partial(reduce, intersect)
+    f = any_intersect ∘ parse_ranges
     sum(map(f, data))
 end
+
+
+#============#
+#=    do    =#
+#============#
 
 data = readlines(ARGS[1]);
 println("Part 1: " * string(part1(data)))
 println("Part 2: " * string(part2(data)))
+
