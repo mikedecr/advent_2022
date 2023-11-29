@@ -1,44 +1,44 @@
-
 using Functors: fmap
 
-# partials
-function rpartial(f, b...)::Function 
-    (a...) -> f(a..., b...) 
-end
+# # λs galore
+splat(f::Function) = args -> f(args...)
+partial(f::Function, a...) = (b...) -> f(a..., b...)
+apply(f::Function) = partial(fmap, f)
+split_at(pattern::AbstractString) = x::AbstractString -> split(x, pattern)
 
-function partial(f, a...)::Function 
-    (b...) -> f(a..., b...)
-end
-
-# like purrr::lift (deprecated) or partial(do.call, fn)
-function unpack(f::Function) 
-    t -> f(t...)
-end
-
+# I could have been so much meaner...
+# splat = f -> a -> f(a...)
+# partial = (f, a...) -> (b...) -> f(a..., b...)
+# apply = f -> x -> fmap(f, x)
+# split_at = s -> x -> split(x, s)
 
 #================#
 #=    part 1    =#
 #================#
 
-function parse_ranges(line::String)::Tuple{UnitRange{Int64}, UnitRange{Int64}}
+# "a-b, c-d" -> range(a, b), range(c, d)
+IntRange = UnitRange{Int64}
+function parse_ranges(line::String)::Tuple{IntRange, IntRange}
     line |> 
-        rpartial(split, ",") |>
-        partial(fmap, rpartial(split, "-")) |>
-        partial(fmap, partial(parse, Int)) |>
-        partial(map, (v -> range(first(v), last(v)))) |>
+        split_at(",") |>
+        apply(split_at("-")) |>
+        apply(x -> parse(Int, x)) |>
+        apply(vect -> range(first(vect), last(vect))) |>
         Tuple
 end
 
-function range_contained(inner::UnitRange, outer::UnitRange)
-    (first(outer) <= first(inner)) && (last(outer) >= last(inner))
+function range_contained(inner::UnitRange, outer::UnitRange)::Bool
+    first(outer) <= first(inner) <= last(inner) <= last(outer)
 end
 
-function either_range_contained(a::UnitRange, b::UnitRange)
+function either_range_contained(a::UnitRange, b::UnitRange)::Bool
     range_contained(a, b) || range_contained(b, a)
 end
 
-function part1(data::AbstractArray{String})::Int
-    f = unpack(either_range_contained) ∘ parse_ranges
+function part1(data::Vector{String})::Int
+    f = line -> line |>
+        parse_ranges |>
+        splat(either_range_contained)
     sum(map(f, data))
 end
 
@@ -46,13 +46,14 @@ end
 #=    part 2    =#
 #================#
 
-function part2(data::AbstractArray{String})::Int
-    # array -> (array -> (int -> bool))
-    any_intersect = >=(1) ∘ length ∘ partial(reduce, intersect)
-    f = any_intersect ∘ parse_ranges
+function part2(data::Vector{String})::Int
+    f = line -> line |>
+        parse_ranges |>
+        splat(intersect) |>
+        length |>
+        >=(1)
     sum(map(f, data))
 end
-
 
 #============#
 #=    do    =#
